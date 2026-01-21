@@ -4,7 +4,7 @@
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from PyQt5.QtCore import QSize, Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QPainterPath, QRegion
@@ -34,7 +34,7 @@ class ActivationWindow(BaseWindow, AsyncMixin):
 
     def __init__(
         self,
-        system_initializer: Optional = None,  # GUI-only: type annotation removed
+        system_initializer: Optional[Any] = None,  # GUI-only: SystemInitializer not available
         parent: Optional = None,
     ):
         # QML相关 - 必须在super().__init__之前创建
@@ -264,8 +264,8 @@ class ActivationWindow(BaseWindow, AsyncMixin):
                 await self._start_activation_process()
             else:
                 # GUI-only version: SystemInitializer not available
-                logger.warning("GUI-only mode: SystemInitializer not available, activation disabled")
-                self.signal_emitter.emit_status("GUI-only mode: Activation not supported")
+                logger.warning("GUI-only mode: Activation not supported (SystemInitializer unavailable)")
+                self.signal_emitter.emit_status("GUI-only mode: Activation feature disabled")
                 return
 
         except Exception as e:

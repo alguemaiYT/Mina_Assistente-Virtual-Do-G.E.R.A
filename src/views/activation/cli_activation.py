@@ -4,7 +4,7 @@ CLI模式设备激活流程 - GUI-only版本已禁用
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 # GUI-only version: SystemInitializer removed
 # from src.core.system_initializer import SystemInitializer
@@ -19,7 +19,7 @@ class CLIActivation:
     CLI模式设备激活处理器.
     """
 
-    def __init__(self, system_initializer: Optional = None):  # GUI-only: type removed
+    def __init__(self, system_initializer: Optional[Any] = None):  # GUI-only: SystemInitializer not available
         # 组件实例
         self.system_initializer = system_initializer
         self.device_activator: Optional[DeviceActivator] = None
@@ -47,7 +47,7 @@ class CLIActivation:
                 return await self._start_activation_process()
             else:
                 # GUI-only version: SystemInitializer not available
-                self._log_and_print("GUI-only模式：激活功能不可用")
+                self._log_and_print("GUI-only mode: Activation feature disabled (SystemInitializer unavailable)")
                 logger.warning("GUI-only mode: CLI activation disabled")
                 return False
 
