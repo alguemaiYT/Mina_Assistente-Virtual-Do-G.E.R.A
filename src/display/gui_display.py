@@ -43,7 +43,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         self.app = None
         self.root = None
         self.qml_widget = None
-        self.system_tray = None
 
         # 数据模型
         self.display_model = GuiDisplayModel()
@@ -114,10 +113,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         if connected_changed:
             self.is_connected = bool(connected)
 
-        # 更新系统托盘
-        if (status_changed or connected_changed) and self.system_tray:
-            self.system_tray.update_status(status, self.is_connected)
-
     async def update_text(self, text: str):
         """
         更新 TTS 文本.
@@ -186,8 +181,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         关闭窗口处理.
         """
         self._running = False
-        if self.system_tray:
-            self.system_tray.hide()
         if self.root:
             self.root.close()
 
@@ -337,8 +330,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
             self.root.showFullScreen()
         else:
             self.root.show()
-
-        self._setup_system_tray()
 
     # =========================================================================
     # 信号连接
@@ -563,31 +554,10 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
     def _setup_system_tray(self):
         """
-        设置系统托盘.
+        设置系统托盘 - 已移除 (GUI-only 版本).
         """
-        if os.getenv("XIAOZHI_DISABLE_TRAY") == "1":
-            self.logger.warning("已通过环境变量禁用系统托盘 (XIAOZHI_DISABLE_TRAY=1)")
-            return
-
-        try:
-            from src.views.components.system_tray import SystemTray
-
-            self.system_tray = SystemTray(self.root)
-
-            # 连接托盘信号（使用 QTimer 确保主线程执行）
-            tray_signals = {
-                "show_window_requested": self._show_main_window,
-                "settings_requested": self._on_settings_button_click,
-                "quit_requested": self._quit_application,
-            }
-
-            for signal_name, handler in tray_signals.items():
-                getattr(self.system_tray, signal_name).connect(
-                    lambda h=handler: QTimer.singleShot(0, h)
-                )
-
-        except Exception as e:
-            self.logger.error(f"初始化系统托盘组件失败: {e}", exc_info=True)
+        # System tray removed in GUI-only version
+        pass
 
     # =========================================================================
     # 窗口控制
@@ -620,9 +590,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         """
         self.logger.info("开始退出应用程序...")
         self._running = False
-
-        if self.system_tray:
-            self.system_tray.hide()
 
         try:
             from src.application import Application
@@ -662,16 +629,9 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
     def _closeEvent(self, event):
         """
-        处理窗口关闭事件.
+        处理窗口关闭事件 - GUI-only 版本直接退出.
         """
-        # 如果系统托盘可用，最小化到托盘
-        if self.system_tray and (
-            getattr(self.system_tray, "is_available", lambda: False)()
-            or getattr(self.system_tray, "is_visible", lambda: False)()
-        ):
-            self.logger.info("关闭窗口：最小化到托盘")
-            QTimer.singleShot(0, self.root.hide)
-            event.ignore()
-        else:
-            QTimer.singleShot(0, self._quit_application)
-            event.accept()
+        # System tray removed - always quit application
+        self.logger.info("关闭窗口：退出应用程序")
+        QTimer.singleShot(0, self._quit_application)
+        event.accept()
