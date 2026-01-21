@@ -586,43 +586,14 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
     def _quit_application(self):
         """
-        退出应用程序.
+        退出应用程序 - GUI-only 版本简化退出.
         """
         self.logger.info("开始退出应用程序...")
         self._running = False
 
         try:
-            from src.application import Application
-
-            app = Application.get_instance()
-            if not app:
-                QApplication.quit()
-                return
-
-            loop = asyncio.get_event_loop()
-            if not loop.is_running():
-                QApplication.quit()
-                return
-
-            # 创建关闭任务并设置超时
-            shutdown_task = asyncio.create_task(app.shutdown())
-
-            def on_shutdown_complete(task):
-                if not task.cancelled() and task.exception():
-                    self.logger.error(f"应用程序关闭异常: {task.exception()}")
-                else:
-                    self.logger.info("应用程序正常关闭")
-                QApplication.quit()
-
-            def force_quit():
-                if not shutdown_task.done():
-                    self.logger.warning("关闭超时，强制退出")
-                    shutdown_task.cancel()
-                QApplication.quit()
-
-            shutdown_task.add_done_callback(on_shutdown_complete)
-            QTimer.singleShot(self.QUIT_TIMEOUT_MS, force_quit)
-
+            # GUI-only version: simple quit without Application class
+            QApplication.quit()
         except Exception as e:
             self.logger.error(f"关闭应用程序失败: {e}")
             QApplication.quit()

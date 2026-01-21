@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-CLI模式设备激活流程 提供与GUI激活窗口相同的功能，但使用纯终端输出.
+CLI模式设备激活流程 - GUI-only版本已禁用
 """
 
 from datetime import datetime
 from typing import Optional
 
-from src.core.system_initializer import SystemInitializer
+# GUI-only version: SystemInitializer removed
+# from src.core.system_initializer import SystemInitializer
 from src.utils.device_activator import DeviceActivator
 from src.utils.logging_config import get_logger
 
@@ -18,7 +19,7 @@ class CLIActivation:
     CLI模式设备激活处理器.
     """
 
-    def __init__(self, system_initializer: Optional[SystemInitializer] = None):
+    def __init__(self, system_initializer: Optional = None):  # GUI-only: type removed
         # 组件实例
         self.system_initializer = system_initializer
         self.device_activator: Optional[DeviceActivator] = None
@@ -45,9 +46,10 @@ class CLIActivation:
                 self._update_device_info()
                 return await self._start_activation_process()
             else:
-                # 否则创建新的实例并运行初始化
-                self._log_and_print("开始系统初始化流程")
-                self.system_initializer = SystemInitializer()
+                # GUI-only version: SystemInitializer not available
+                self._log_and_print("GUI-only模式：激活功能不可用")
+                logger.warning("GUI-only mode: CLI activation disabled")
+                return False
 
                 # 运行初始化流程
                 init_result = await self.system_initializer.run_initialization()

@@ -11,7 +11,8 @@ from PyQt5.QtGui import QPainterPath, QRegion
 from PyQt5.QtQuickWidgets import QQuickWidget
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
 
-from src.core.system_initializer import SystemInitializer
+# GUI-only version: SystemInitializer removed
+# from src.core.system_initializer import SystemInitializer
 from src.utils.device_activator import DeviceActivator
 from src.utils.logging_config import get_logger
 
@@ -33,7 +34,7 @@ class ActivationWindow(BaseWindow, AsyncMixin):
 
     def __init__(
         self,
-        system_initializer: Optional[SystemInitializer] = None,
+        system_initializer: Optional = None,  # GUI-only: type annotation removed
         parent: Optional = None,
     ):
         # QML相关 - 必须在super().__init__之前创建
@@ -262,30 +263,10 @@ class ActivationWindow(BaseWindow, AsyncMixin):
                 self._update_device_info()
                 await self._start_activation_process()
             else:
-                # 否则创建新的实例并运行初始化
-                self.system_initializer = SystemInitializer()
-
-                # 运行初始化流程
-                init_result = await self.system_initializer.run_initialization()
-
-                if init_result.get("success", False):
-                    self._update_device_info()
-
-                    # 显示状态消息
-                    self.status_message = init_result.get("status_message", "")
-                    if self.status_message:
-                        self.signal_emitter.emit_status(self.status_message)
-
-                    # 检查是否需要激活
-                    if init_result.get("need_activation_ui", True):
-                        await self._start_activation_process()
-                    else:
-                        # 无需激活，直接完成
-                        self.is_activated = True
-                        self.activation_completed.emit(True)
-                else:
-                    error_msg = init_result.get("error", "初始化失败")
-                    self.signal_emitter.emit_error(error_msg)
+                # GUI-only version: SystemInitializer not available
+                logger.warning("GUI-only mode: SystemInitializer not available, activation disabled")
+                self.signal_emitter.emit_status("GUI-only mode: Activation not supported")
+                return
 
         except Exception as e:
             self.logger.error(f"初始化过程异常: {e}", exc_info=True)
