@@ -129,6 +129,9 @@ Rectangle {
                     Component {
                         id: gifComponent
                         AnimatedImage {
+                            anchors.fill: parent
+                            width: parent.width
+                            height: parent.height
                             fillMode: Image.PreserveAspectCrop
                             source: displayModel ? displayModel.emotionPath : ""
                             playing: true
@@ -146,6 +149,9 @@ Rectangle {
                     Component {
                         id: imageComponent
                         Image {
+                            anchors.fill: parent
+                            width: parent.width
+                            height: parent.height
                             fillMode: Image.PreserveAspectCrop
                             source: displayModel ? displayModel.emotionPath : ""
                             cache: true
@@ -162,9 +168,12 @@ Rectangle {
                         id: emojiComponent
                         Text {
                             text: displayModel ? displayModel.emotionPath : "😊"
-                            font.pixelSize: 80
+                            width: parent.width
+                            height: parent.height
+                            font.pixelSize: Math.max(Math.min(parent.width, parent.height) * 0.8, 60)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                            anchors.fill: parent
                         }
                     }
                 }
@@ -179,7 +188,7 @@ Rectangle {
                 Text {
                     anchors.fill: parent
                     anchors.margins: 10
-                    text: displayModel ? displayModel.ttsText : "Idle"
+                    text: displayModel ? displayModel.ttsText : ""
                     font.family: "PingFang SC, Microsoft YaHei UI"
                     font.pixelSize: 13
                     color: "#555555"

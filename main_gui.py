@@ -8,6 +8,7 @@ Ideal for testing and developing the GUI components in isolation.
 """
 
 import asyncio
+import argparse
 import sys
 import os
 import signal
@@ -36,7 +37,15 @@ from src.utils.logging_config import get_logger, setup_logging
 logger = get_logger(__name__)
 
 
-async def run_gui():
+def _parse_cli_args():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-f", "--fullscreen", action="store_true")
+    args, remaining = parser.parse_known_args(sys.argv[1:])
+    sys.argv = [sys.argv[0]] + remaining
+    return args.fullscreen
+
+
+async def run_gui(fullscreen: bool = False):
     """
     Run the GUI display in standalone mode.
     """
@@ -45,6 +54,8 @@ async def run_gui():
     try:
         # Create and start the GUI display
         gui_display = GuiDisplay()
+        if fullscreen:
+            gui_display.set_force_fullscreen(True)
         
         # Set minimal callbacks (optional - can be expanded for testing)
         await gui_display.set_callbacks(
@@ -90,6 +101,7 @@ def main():
         except Exception:
             pass
         
+        fullscreen = _parse_cli_args()
         # Create Qt application
         qt_app = QApplication.instance() or QApplication(sys.argv)
         qt_app.setQuitOnLastWindowClosed(False)
@@ -101,7 +113,7 @@ def main():
         
         # Run the GUI
         with loop:
-            exit_code = loop.run_until_complete(run_gui())
+            exit_code = loop.run_until_complete(run_gui(fullscreen=fullscreen))
             
     except KeyboardInterrupt:
         logger.info("Program interrupted by user")

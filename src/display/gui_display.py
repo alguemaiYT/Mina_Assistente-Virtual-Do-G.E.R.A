@@ -53,6 +53,7 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
         # 状态管理
         self._running = True
+        self._force_fullscreen = False
         self.current_status = ""
         self.is_connected = True
 
@@ -70,6 +71,10 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
     # =========================================================================
     # 公共 API - 回调与更新
     # =========================================================================
+
+    def set_force_fullscreen(self, force: bool):
+        """Force the main window to open full screen."""
+        self._force_fullscreen = bool(force)
 
     async def set_callbacks(
         self,
@@ -236,6 +241,9 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
             screen_rect = desktop.availableGeometry()
             screen_width = screen_rect.width()
             screen_height = screen_rect.height()
+
+            if self._force_fullscreen:
+                return ((screen_width, screen_height), True)
 
             # 根据模式计算窗口大小
             if window_size_mode == "default":
