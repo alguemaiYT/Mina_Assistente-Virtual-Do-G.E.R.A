@@ -1,82 +1,116 @@
-# py-xiaozhi
+# py-xiaozhi-english-dragonbotz (GUI-only Version)
 
-<p align="center" class="trendshift">
-  <a href="https://trendshift.io/repositories/14130" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/14130" alt="Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
-</p>
-<p align="center">
-  <a href="https://github.com/huangjunsen0406/py-xiaozhi/releases/latest">
-    <img src="https://img.shields.io/github/v/release/huangjunsen0406/py-xiaozhi?style=flat-square&logo=github&color=blue" alt="Release"/>
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License: MIT"/>
-  </a>
-  <a href="https://github.com/huangjunsen0406/py-xiaozhi/stargazers">
-    <img src="https://img.shields.io/github/stars/huangjunsen0406/py-xiaozhi?style=flat-square&logo=github" alt="Stars"/>
-  </a>
-  <a href="https://github.com/huangjunsen0406/py-xiaozhi/releases/latest">
-    <img src="https://img.shields.io/github/downloads/huangjunsen0406/py-xiaozhi/total?style=flat-square&logo=github&color=52c41a1&maxAge=86400" alt="Download"/>
-  </a>
-  <a href="https://gitee.com/huang-jun-sen/py-xiaozhi">
-    <img src="https://img.shields.io/badge/Gitee-FF5722?style=flat-square&logo=gitee" alt="Gitee"/>
-  </a>
-  <a href="https://huangjunsen0406.github.io/py-xiaozhi/guide/00_%E6%96%87%E6%A1%A3%E7%9B%AE%E5%BD%95.html">
-    <img alt="Usage Docs" src="https://img.shields.io/badge/Usage Docs-View-blue?labelColor=2d2d2d" />
-  </a>
-</p>
+English | [简体中文](README-cn.md)
 
-English | [简体中文](README.md)
+## ⚠️ Important Notice
 
-## Project Introduction
+This is a **GUI-only version** of py-xiaozhi, containing only the graphical user interface components for testing and development purposes.
 
-py-xiaozhi is a Python-based Xiaozhi voice client, designed to learn coding and experience AI voice interaction without hardware requirements. This repository is ported from [xiaozhi-esp32](https://github.com/78/xiaozhi-esp32).
+**This version does NOT include:**
+- ❌ AI voice interaction backend
+- ❌ Audio processing capabilities
+- ❌ MCP tools ecosystem
+- ❌ IoT device integration
+- ❌ Network protocols (MQTT, WebSocket)
+- ❌ Voice recognition and wake word detection
+- ❌ System tray functionality
 
-## Demo
+**This version ONLY includes:**
+- ✅ GUI display components (QML + Python)
+- ✅ Visual interface for testing
+- ✅ Basic window management
+- ✅ Asset resources (images, emojis, etc.)
 
-- [Bilibili Demo Video](https://www.bilibili.com/video/BV1HmPjeSED2/#reply255921347937)
+## Purpose
 
-![Image](./documents/docs/guide/images/系统界面.png)
+This minimal version is intended for:
+- GUI development and testing
+- Interface design iteration
+- QML component debugging
+- Visual testing without backend dependencies
 
-## Features
+## Quick Start
 
-### 🎯 Core AI Capabilities
+### Prerequisites
 
-- **AI Voice Interaction**: Supports voice input and recognition, enabling intelligent human-computer interaction with natural conversation flow
-- **Visual Multimodal**: Supports image recognition and processing, providing multimodal interaction capabilities and image content understanding
-- **Intelligent Wake-up**: Supports multiple wake word activation for hands-free interaction (configurable)
-- **Continuous Dialogue Mode**: Implements seamless conversation experience, enhancing user interaction fluidity
+```bash
+pip install -r requirements.txt
+```
 
-### 🔧 MCP Tools Ecosystem
+Minimum dependencies:
+- Python 3.8+
+- PyQt5
+- qasync
 
-- **System Control Tools**: System status monitoring, application management, volume control, device management
-- **Calendar Management Tools**: Full-featured calendar system with create, query, update, delete events, intelligent categorization and reminders
-- **Timer Tools**: Countdown timer functionality with delayed MCP tool execution and parallel task management
-- **Music Player Tools**: Online music search and playback with playback controls, lyrics display, and local cache management
-- **12306 Query Tools**: 12306 railway ticket query with train tickets, transfer queries, and route information
-- **Search Tools**: Web search and content retrieval with Bing search integration and intelligent content parsing
-- **Recipe Tools**: Rich recipe database with search, category browsing, and intelligent recommendations
-- **Map Tools**: Amap services with geocoding, route planning, nearby search, and weather queries
-- **Bazi Fortune Tools**: Traditional Chinese fortune-telling with Bazi calculation, marriage analysis, and lunar calendar queries
-- **Camera Tools**: Image capture and AI analysis with photo recognition and intelligent Q&A
+### Running the GUI
 
-### 🏠 IoT Device Integration
+```bash
+python main_gui.py
+```
 
-- **Device Management Architecture**: Unified device management based on Thing pattern with asynchronous property and method calls
-- **Smart Home Control**: Supports lighting, volume, temperature sensors, and other device control
-- **State Synchronization**: Real-time status monitoring with incremental updates and concurrent state retrieval
-- **Extensible Design**: Modular device drivers, easy to add new device types
+The GUI will start in standalone mode without any backend services.
 
-### 🎵 Advanced Audio Processing
+## Project Structure
 
-- **Multi-level Audio Processing**: Supports Opus codec and real-time resampling
-- **Voice Activity Detection**: VAD detector for intelligent interruption with real-time voice activity monitoring
-- **Wake Word Detection**: Sherpa-ONNX-based offline speech recognition with multiple wake words and pinyin matching
-- **Audio Stream Management**: Independent input/output streams with stream rebuild and error recovery
-- **Audio Echo Cancellation**: Integrated WebRTC audio processing module providing high-quality echo cancellation
-- **System Audio Recording**: Supports system audio recording with audio loopback processing
+```
+py-xiaozhi-english-dragonbotz/
+├── main_gui.py              # Minimal GUI launcher
+├── assets/                  # Images, emojis, and resources
+├── src/
+│   ├── display/             # Display layer
+│   │   ├── gui_display.py   # Main GUI class
+│   │   ├── gui_display.qml  # QML interface
+│   │   ├── gui_display_model.py
+│   │   └── base_display.py
+│   ├── views/               # View components
+│   │   ├── activation/      # Activation views
+│   │   ├── settings/        # Settings views
+│   │   ├── components/      # Reusable components
+│   │   └── base/            # Base classes
+│   └── utils/               # Utilities
+│       ├── resource_finder.py
+│       ├── logging_config.py
+│       ├── config_manager.py
+│       ├── common_utils.py
+│       └── device_activator.py
+└── documents/               # Documentation
+```
 
-### 🖥️ User Interface
+## Development
+
+This GUI-only version is suitable for:
+
+1. **UI/UX Design**: Test and iterate on interface designs
+2. **QML Development**: Develop and debug QML components
+3. **Visual Testing**: Verify visual elements and layouts
+4. **Component Testing**: Test individual GUI components in isolation
+
+## Configuration
+
+The GUI uses the same configuration files as the full version:
+- Configuration is managed through `ConfigManager`
+- Settings are stored in platform-specific locations
+- Window size, display options, and preferences are configurable
+
+## Notes
+
+- The GUI will start but won't have backend functionality
+- Callbacks are set up but won't trigger actual AI operations
+- This is purely a visual/frontend testing environment
+- To use the full AI capabilities, please use the complete version
+
+## License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+## Original Project
+
+This is a minimal GUI-only fork. For the complete project with all features, see:
+- [Original py-xiaozhi Repository](https://github.com/huangjunsen0406/py-xiaozhi)
+
+## Credits
+
+Based on py-xiaozhi by huangjunsen0406, which is ported from [xiaozhi-esp32](https://github.com/78/xiaozhi-esp32).
 
 - **Graphical Interface**: Modern PyQt5-based GUI with Xiaozhi expressions and text display for enhanced visual experience
 - **Command Line Mode**: CLI support suitable for embedded devices or GUI-less environments
