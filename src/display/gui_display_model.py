@@ -16,17 +16,11 @@ class GuiDisplayModel(QObject):
     emotionPathChanged = pyqtSignal()
     ttsTextChanged = pyqtSignal()
     buttonTextChanged = pyqtSignal()
-    modeTextChanged = pyqtSignal()
-    autoModeChanged = pyqtSignal()
 
     # 用户操作信号
-    manualButtonPressed = pyqtSignal()
-    manualButtonReleased = pyqtSignal()
     autoButtonClicked = pyqtSignal()
     abortButtonClicked = pyqtSignal()
-    modeButtonClicked = pyqtSignal()
     sendButtonClicked = pyqtSignal(str)  # 携带输入的文本
-    settingsButtonClicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -36,8 +30,6 @@ class GuiDisplayModel(QObject):
         self._emotion_path = ""  # 表情资源路径（GIF/图片）或 emoji 字符
         self._tts_text = "Idle"
         self._button_text = "Start Conversation"  # 自动模式按钮文本
-        self._mode_text = "Manual"  # 模式切换按钮文本
-        self._auto_mode = False  # 是否自动模式
         self._is_connected = False
 
     # 状态文本属性
@@ -84,35 +76,11 @@ class GuiDisplayModel(QObject):
             self._button_text = value
             self.buttonTextChanged.emit()
 
-    # 模式切换按钮文本属性
-    @pyqtProperty(str, notify=modeTextChanged)
-    def modeText(self):
-        return self._mode_text
-
-    @modeText.setter
-    def modeText(self, value):
-        if self._mode_text != value:
-            self._mode_text = value
-            self.modeTextChanged.emit()
-
-    # 自动模式标志属性
-    @pyqtProperty(bool, notify=autoModeChanged)
-    def autoMode(self):
-        return self._auto_mode
-
-    @autoMode.setter
-    def autoMode(self, value):
-        if self._auto_mode != value:
-            self._auto_mode = value
-            self.autoModeChanged.emit()
-
     # 便捷方法
     def update_status(self, status: str, connected: bool):
         """
         更新状态文本和连接状态.
         """
-        # Keep format "Status: <status>" for English UI; callers may pass either English or Chinese status strings
-        # If caller already formats with a prefix, avoid double-prefixing.
         if status.startswith("状态:") or status.startswith("Status:"):
             self.statusText = status
         else:
@@ -136,19 +104,3 @@ class GuiDisplayModel(QObject):
         更新自动模式按钮文本.
         """
         self.buttonText = text
-
-    def update_mode_text(self, text: str):
-        """
-        更新模式按钮文本.
-        """
-        self.modeText = text
-
-    def set_auto_mode(self, is_auto: bool):
-        """
-        设置自动模式.
-        """
-        self.autoMode = is_auto
-        if is_auto:
-            self.modeText = "Auto"
-        else:
-            self.modeText = "Manual"

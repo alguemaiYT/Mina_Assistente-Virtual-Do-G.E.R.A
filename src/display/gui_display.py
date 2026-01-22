@@ -52,7 +52,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         self._last_emotion_name = None
 
         # 状态管理
-        self.auto_mode = False
         self._running = True
         self.current_status = ""
         self.is_connected = True
@@ -63,9 +62,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
         # 回调函数映射
         self._callbacks = {
-            "button_press": None,
-            "button_release": None,
-            "mode": None,
             "auto": None,
             "abort": None,
             "send_text": None,
@@ -77,9 +73,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
     async def set_callbacks(
         self,
-        press_callback: Optional[Callable] = None,
-        release_callback: Optional[Callable] = None,
-        mode_callback: Optional[Callable] = None,
         auto_callback: Optional[Callable] = None,
         abort_callback: Optional[Callable] = None,
         send_text_callback: Optional[Callable] = None,
@@ -89,9 +82,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         """
         self._callbacks.update(
             {
-                "button_press": press_callback,
-                "button_release": release_callback,
-                "mode": mode_callback,
                 "auto": auto_callback,
                 "abort": abort_callback,
                 "send_text": send_text_callback,
@@ -151,16 +141,7 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         """
         更新按钮状态.
         """
-        if self.auto_mode:
-            self.display_model.update_button_text(text)
-
-    async def toggle_mode(self):
-        """
-        切换对话模式.
-        """
-        if self._callbacks["mode"]:
-            self._on_mode_button_click()
-            self.logger.debug("通过快捷键切换了对话模式")
+        self.display_model.update_button_text(text)
 
     async def toggle_window_visibility(self):
         """
@@ -346,13 +327,9 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
 
         # 按钮事件信号映射
         button_signals = {
-            "manualButtonPressed": self._on_manual_button_press,
-            "manualButtonReleased": self._on_manual_button_release,
             "autoButtonClicked": self._on_auto_button_click,
             "abortButtonClicked": self._on_abort_button_click,
-            "modeButtonClicked": self._on_mode_button_click,
             "sendButtonClicked": self._on_send_button_click,
-            "settingsButtonClicked": self._on_settings_button_click,
         }
 
         # 标题栏控制信号映射
@@ -377,18 +354,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
     # 按钮事件处理
     # =========================================================================
 
-    def _on_manual_button_press(self):
-        """
-        手动模式按钮按下.
-        """
-        self._dispatch_callback("button_press")
-
-    def _on_manual_button_release(self):
-        """
-        手动模式按钮释放.
-        """
-        self._dispatch_callback("button_release")
-
     def _on_auto_button_click(self):
         """
         自动模式按钮点击.
@@ -400,18 +365,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
         中止按钮点击.
         """
         self._dispatch_callback("abort")
-
-    def _on_mode_button_click(self):
-        """
-        对话模式切换按钮点击.
-        """
-        if self._callbacks["mode"] and not self._callbacks["mode"]():
-            return
-
-        self.auto_mode = not self.auto_mode
-        mode_text = "自动对话" if self.auto_mode else "手动对话"
-        self.display_model.update_mode_text(mode_text)
-        self.display_model.set_auto_mode(self.auto_mode)
 
     def _on_send_button_click(self, text: str):
         """
@@ -432,18 +385,6 @@ class GuiDisplay(BaseDisplay, QObject, metaclass=CombinedMeta):
             )
         except Exception as e:
             self.logger.error(f"发送文本时出错: {e}")
-
-    def _on_settings_button_click(self):
-        """
-        处理设置按钮点击.
-        """
-        try:
-            from src.views.settings import SettingsWindow
-
-            settings_window = SettingsWindow(self.root)
-            settings_window.exec_()
-        except Exception as e:
-            self.logger.error(f"打开设置窗口失败: {e}", exc_info=True)
 
     def _dispatch_callback(self, callback_name: str, *args):
         """

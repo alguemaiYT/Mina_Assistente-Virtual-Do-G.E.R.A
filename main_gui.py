@@ -48,9 +48,6 @@ async def run_gui():
         
         # Set minimal callbacks (optional - can be expanded for testing)
         await gui_display.set_callbacks(
-            press_callback=lambda: logger.info("Button pressed"),
-            release_callback=lambda: logger.info("Button released"),
-            mode_callback=lambda mode: logger.info(f"Mode changed: {mode}"),
             auto_callback=lambda: logger.info("Auto mode toggled"),
             abort_callback=lambda: logger.info("Aborted"),
             send_text_callback=lambda text: logger.info(f"Text sent: {text}"),

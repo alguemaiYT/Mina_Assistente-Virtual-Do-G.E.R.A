@@ -8,13 +8,9 @@ Rectangle {
     color: "#f5f5f5"
 
     // 信号定义 - 与 Python 回调对接
-    signal manualButtonPressed()
-    signal manualButtonReleased()
     signal autoButtonClicked()
     signal abortButtonClicked()
-    signal modeButtonClicked()
     signal sendButtonClicked(string text)
-    signal settingsButtonClicked()
     // 标题栏相关信号
     signal titleMinimize()
     signal titleClose()
@@ -97,128 +93,99 @@ Rectangle {
             }
         }
 
-        // 状态卡片区域
-        Rectangle {
-            id: statusCard
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: "transparent"
+        // 内容区域（表情、TTS, 输入）
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 12
+            spacing: 12
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 12
-                spacing: 12
+            // 表情显示区域
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 80
 
-                // 状态标签
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 40
-                    color: "#E3F2FD"
-                    radius: 10
+                Loader {
+                    id: emotionLoader
+                    anchors.centerIn: parent
+                    property real maxSize: Math.max(Math.min(parent.width, parent.height) * 0.7, 60)
+                    width: maxSize
+                    height: maxSize
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: displayModel ? displayModel.statusText : "Status: Disconnected"
-                        font.family: "PingFang SC, Microsoft YaHei UI"
-                        font.pixelSize: 14
-                        font.weight: Font.Bold
-                        color: "#2196F3"
-                    }
-                }
-
-                // 表情显示区域
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: 80
-
-                    // 动态加载表情：AnimatedImage 用于 GIF，Image 用于静态图，Text 用于 emoji
-                    Loader {
-                        id: emotionLoader
-                        anchors.centerIn: parent
-                        // 保持正方形，取宽高中较小值的 70%，最小60px
-                        property real maxSize: Math.max(Math.min(parent.width, parent.height) * 0.7, 60)
-                        width: maxSize
-                        height: maxSize
-
-                        sourceComponent: {
-                            var path = displayModel ? displayModel.emotionPath : ""
-                            if (!path || path.length === 0) {
-                                return emojiComponent
-                            }
-                            if (path.indexOf(".gif") !== -1) {
-                                return gifComponent
-                            }
-                            if (path.indexOf(".") !== -1) {
-                                return imageComponent
-                            }
+                    sourceComponent: {
+                        var path = displayModel ? displayModel.emotionPath : ""
+                        if (!path || path.length === 0) {
                             return emojiComponent
                         }
+                        if (path.indexOf(".gif") !== -1) {
+                            return gifComponent
+                        }
+                        if (path.indexOf(".") !== -1) {
+                            return imageComponent
+                        }
+                        return emojiComponent
+                    }
 
-                        // GIF 动图组件
-                        Component {
-                            id: gifComponent
-                            AnimatedImage {
-                                fillMode: Image.PreserveAspectCrop
-                                source: displayModel ? displayModel.emotionPath : ""
-                                playing: true
-                                speed: 1.05
-                                cache: true
-                                clip: true
-                                onStatusChanged: {
-                                    if (status === Image.Error) {
-                                        console.error("AnimatedImage error:", errorString, "src=", source)
-                                    }
+                    Component {
+                        id: gifComponent
+                        AnimatedImage {
+                            fillMode: Image.PreserveAspectCrop
+                            source: displayModel ? displayModel.emotionPath : ""
+                            playing: true
+                            speed: 1.05
+                            cache: true
+                            clip: true
+                            onStatusChanged: {
+                                if (status === Image.Error) {
+                                    console.error("AnimatedImage error:", errorString, "src=", source)
                                 }
                             }
                         }
+                    }
 
-                        // 静态图片组件
-                        Component {
-                            id: imageComponent
-                            Image {
-                                fillMode: Image.PreserveAspectCrop
-                                source: displayModel ? displayModel.emotionPath : ""
-                                cache: true
-                                clip: true
-                                onStatusChanged: {
-                                    if (status === Image.Error) {
-                                        console.error("Image error:", errorString, "src=", source)
-                                    }
+                    Component {
+                        id: imageComponent
+                        Image {
+                            fillMode: Image.PreserveAspectCrop
+                            source: displayModel ? displayModel.emotionPath : ""
+                            cache: true
+                            clip: true
+                            onStatusChanged: {
+                                if (status === Image.Error) {
+                                    console.error("Image error:", errorString, "src=", source)
                                 }
                             }
                         }
+                    }
 
-                        // Emoji 文本组件
-                        Component {
-                            id: emojiComponent
-                            Text {
-                                text: displayModel ? displayModel.emotionPath : "😊"
-                                font.pixelSize: 80
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                            }
+                    Component {
+                        id: emojiComponent
+                        Text {
+                            text: displayModel ? displayModel.emotionPath : "😊"
+                            font.pixelSize: 80
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
                         }
                     }
                 }
+            }
 
-                // TTS 文本显示区域
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 60
-                    color: "transparent"
+            // TTS 文本显示区域
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 60
+                color: "transparent"
 
-                    Text {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        text: displayModel ? displayModel.ttsText : "Idle"
-                        font.family: "PingFang SC, Microsoft YaHei UI"
-                        font.pixelSize: 13
-                        color: "#555555"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        wrapMode: Text.WordWrap
-                    }
+                Text {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    text: displayModel ? displayModel.ttsText : "Idle"
+                    font.family: "PingFang SC, Microsoft YaHei UI"
+                    font.pixelSize: 13
+                    color: "#555555"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.WordWrap
                 }
             }
         }
@@ -236,37 +203,6 @@ Rectangle {
                 anchors.bottomMargin: 10
                 spacing: 6
 
-                // 手动模式按钮（按住说话） - 主色
-                Button {
-                    id: manualBtn
-                    Layout.preferredWidth: 100
-                    Layout.fillWidth: true
-                    Layout.maximumWidth: 140
-                    Layout.preferredHeight: 38
-                    text: "Hold to Speak"
-                    visible: displayModel ? !displayModel.autoMode : true
-
-                    background: Rectangle {
-                        color: manualBtn.pressed ? "#0e42d2" : (manualBtn.hovered ? "#4080ff" : "#165dff")
-                        radius: 8
-
-                        Behavior on color { ColorAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                    }
-
-                    contentItem: Text {
-                        text: manualBtn.text
-                        font.family: "PingFang SC, Microsoft YaHei UI"
-                        font.pixelSize: 12
-                        color: "white"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                    }
-
-                    onPressed: { manualBtn.text = "Release to Stop"; root.manualButtonPressed() }
-                    onReleased: { manualBtn.text = "Hold to Speak"; root.manualButtonReleased() }
-                }
-
                 // 自动模式按钮 - 主色
                 Button {
                     id: autoBtn
@@ -275,7 +211,7 @@ Rectangle {
                     Layout.maximumWidth: 140
                     Layout.preferredHeight: 38
                     text: displayModel ? displayModel.buttonText : "Start Conversation"
-                    visible: displayModel ? displayModel.autoMode : false
+                    visible: true
 
                     background: Rectangle {
                         color: autoBtn.pressed ? "#0e42d2" : (autoBtn.hovered ? "#4080ff" : "#165dff")
@@ -370,47 +306,6 @@ Rectangle {
                     }
                 }
 
-                // 模式（次要）
-                Button {
-                    id: modeBtn
-                    Layout.preferredWidth: 80
-                    Layout.fillWidth: true
-                    Layout.maximumWidth: 120
-                    Layout.preferredHeight: 38
-                    text: displayModel ? displayModel.modeText : "Manual"
-                    background: Rectangle { color: modeBtn.pressed ? "#e5e6eb" : (modeBtn.hovered ? "#f2f3f5" : "#eceff3"); radius: 8 }
-                    contentItem: Text {
-                        text: modeBtn.text
-                        font.family: "PingFang SC, Microsoft YaHei UI"
-                        font.pixelSize: 12
-                        color: "#1d2129"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                    }
-                    onClicked: root.modeButtonClicked()
-                }
-
-                // 设置（次要）
-                Button {
-                    id: settingsBtn
-                    Layout.preferredWidth: 80
-                    Layout.fillWidth: true
-                    Layout.maximumWidth: 120
-                    Layout.preferredHeight: 38
-                    text: "Settings"
-                    background: Rectangle { color: settingsBtn.pressed ? "#e5e6eb" : (settingsBtn.hovered ? "#f2f3f5" : "#eceff3"); radius: 8 }
-                    contentItem: Text {
-                        text: settingsBtn.text
-                        font.family: "PingFang SC, Microsoft YaHei UI"
-                        font.pixelSize: 12
-                        color: "#1d2129"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                    }
-                    onClicked: root.settingsButtonClicked()
-                }
             }
         }
     }

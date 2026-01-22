@@ -15,9 +15,6 @@ class BaseDisplay(ABC):
     @abstractmethod
     async def set_callbacks(
         self,
-        press_callback: Optional[Callable] = None,
-        release_callback: Optional[Callable] = None,
-        mode_callback: Optional[Callable] = None,
         auto_callback: Optional[Callable] = None,
         abort_callback: Optional[Callable] = None,
         send_text_callback: Optional[Callable] = None,
