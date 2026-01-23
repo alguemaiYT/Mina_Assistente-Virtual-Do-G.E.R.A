@@ -32,6 +32,7 @@ except ImportError as e:
     sys.exit(1)
 
 from src.display.gui_display import GuiDisplay
+from src.utils.chat_bridge import ChatBridge
 from src.utils.logging_config import get_logger, setup_logging
 
 logger = get_logger(__name__)
@@ -52,30 +53,61 @@ async def run_gui(fullscreen: bool = False):
     logger.info("Starting Xiaozhi GUI (standalone mode)")
     
     try:
+        chat_bridge = ChatBridge()
+
         # Create and start the GUI display
         gui_display = GuiDisplay()
         if fullscreen:
             gui_display.set_force_fullscreen(True)
-        
-        # Set minimal callbacks (optional - can be expanded for testing)
+
+        async def handle_send_text(text: str):
+            """Send text to the C chat engine and stream tokens back to the GUI."""
+            await gui_display.update_status("Thinking...", True)
+            await gui_display.update_text("")
+
+            current_text = ""
+
+            async def on_token(chunk: str):
+                nonlocal current_text
+                current_text += chunk
+                await gui_display.update_text(current_text)
+
+            async def on_emotion(emotion: str):
+                # update GUI emotion (file names expect lower-case keys)
+                await gui_display.update_emotion(emotion)
+
+            try:
+                await chat_bridge.send_and_stream(text, on_token=on_token, on_emotion=on_emotion)
+                stderr_chunk = await chat_bridge.read_stderr()
+                if stderr_chunk:
+                    logger.info(stderr_chunk.strip())
+                await gui_display.update_status("Ready", True)
+            except Exception as exc:
+                logger.error(f"Chat error: {exc}", exc_info=True)
+                await gui_display.update_status("Chat error", False)
+
+        # Set callbacks so GUI input flows into the C backend
         await gui_display.set_callbacks(
             auto_callback=lambda: logger.info("Auto mode toggled"),
             abort_callback=lambda: logger.info("Aborted"),
-            send_text_callback=lambda text: logger.info(f"Text sent: {text}"),
+            send_text_callback=handle_send_text,
         )
         
         # Start the GUI
         await gui_display.start()
         
         # Set initial status
-        await gui_display.update_status("GUI Ready (standalone mode)", True)
+        await gui_display.update_status("GUI Ready (C backend)", True)
         await gui_display.update_emotion("neutral")
         
         logger.info("GUI started successfully")
         
         # Keep the event loop running until GUI is closed
-        while gui_display._running:
-            await asyncio.sleep(0.1)
+        try:
+            while gui_display._running:
+                await asyncio.sleep(0.1)
+        finally:
+            await chat_bridge.stop()
             
     except Exception as e:
         logger.error(f"GUI error: {e}", exc_info=True)
